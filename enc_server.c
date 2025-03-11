@@ -71,12 +71,13 @@ int main(int argc, char *argv[]){
         if (charsRead < 0){
             error("ERROR reading from socket");
         }
-        printf("SERVER: I received thisssssss: \"%s\"\n", buffer);
+        printf("SERVER: I received this: \"%s\"\n", buffer);
 
         // Break message into plaintext and key
         char *token;
         char message[4096];
         char key[4096] = "";
+        char encKey[4096] = "";
 
         // Initialize message as an empty string
         message[0] = '\0';
@@ -91,9 +92,27 @@ int main(int argc, char *argv[]){
             }
         }
 
+        for(int i = 0; i < strlen(message); ++i){
+          // convert ascii values to alphabet index values (A = 0, B = 1, etc.)
+          int currMsg = message[i] - 65;
+          int currKey = key[i] - 65;
+          int total = currMsg + currKey;
+
+          // if total ascii value exceeds 26, wrap around to beginning of alphabet
+          if (total > 26){
+            total -= 26;
+          }
+
+          // convert ASCII value and append to encrypted message
+          char temp[10];
+          sprintf(temp, "%d", total); 
+          strcat(encKey, temp); 
+        }
+
         // Print message and key broken up
         printf("SERVER: THIS IS THE MESSAGE: %s\n", message);
         printf("SERVER: THIS IS THE KEY: %s\n", key);
+        printf("SERVER: THIS IS THE Encrypted Message: %s\n", encKey);
 
         // Send a Success message back to the client
         charsRead = send(connectionSocket,
