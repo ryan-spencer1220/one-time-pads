@@ -29,7 +29,6 @@ void setupAddressStruct(struct sockaddr_in* address,
 
   // The address should be network capable
   address->sin_family = AF_INET;
-  // Store the port number
   address->sin_port = htons(portNumber);
 
   // Get the DNS entry for this host name
@@ -50,7 +49,7 @@ int main(int argc, char *argv[]) {
 
   // Check usage & args
   if (argc < 4) { 
-    fprintf(stderr,"USAGE: %s hostname port\n", argv[2]); 
+    fprintf(stderr,"USAGE: %s hostname port\n", argv[3]); 
     exit(0); 
   }
 
@@ -60,7 +59,7 @@ int main(int argc, char *argv[]) {
       return 1;
   }
 
-  FILE *keyFile = fopen(argv[1], "r");
+  FILE *keyFile = fopen(argv[2], "r");
   if (keyFile == NULL) {
       perror("Error opening encryption key file");
       return 1;
@@ -73,7 +72,7 @@ int main(int argc, char *argv[]) {
   }
 
    // Set up the server address struct
-  setupAddressStruct(&serverAddress, atoi(argv[2]), argv[1]);
+  setupAddressStruct(&serverAddress, atoi(argv[3]), "localhost");
 
   // Connect to server
   if (connect(socketFD, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) < 0){
