@@ -7,23 +7,15 @@
 #include <unistd.h>
 
 
-// Error function used for reporting issues
 void error(const char *msg) {
  perror(msg);
  exit(1);
 }
 
-// Set up the address struct for the server socket
 void setupAddressStruct(struct sockaddr_in* address, int portNumber){
-
- // Clear out the address struct
  memset((char*) address, '\0', sizeof(*address));
-
- // The address should be network capable
  address->sin_family = AF_INET;
- // Store the port number
  address->sin_port = htons(portNumber);
- // Allow a client at any address to connect to this server
  address->sin_addr.s_addr = INADDR_ANY;
 }
 
