@@ -14,7 +14,7 @@ int main(int argc, char *argv[]) {
   } 
 
   int keyLength = atoi(argv[1]);
-  char key[256];
+  char key[1000];
   srand(time(NULL));
 
   for (int i = 0; i < keyLength; ++i) {

@@ -1,17 +1,10 @@
-#include <netdb.h>      // gethostbyname()
+#include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/socket.h> // send(),recv()
-#include <sys/types.h>  // ssize_t
+#include <sys/socket.h>
+#include <sys/types.h>
 #include <unistd.h>
-
-/**
-* Client code
-* 1. Create a socket and connect to the server specified in the command arguments.
-* 2. Prompt the user for input and send that input as a message to the server.
-* 3. Print the message received from the server and exit the program.
-*/
 
 // Error function used for reporting issues
 void error(const char *msg) { 
@@ -91,18 +84,42 @@ int main(int argc, char *argv[]) {
       strcat(key, keyBuffer);
   }
 
+  // Check for valid key file
+  if(strlen(message) > strlen(key)){
+    printf("Error: key %s is too short\n", argv[2]);
+    exit(1);
+  }
+
+  // Check for valid message
+  for(int i = 0; i < strlen(message); ++i){
+    if ((message[i] < 'A' || message[i] > 'Z') && message[i] != ' ' && message[i] != '\n') {
+      error("enc_client error: message contains bad characters\n");
+      exit(1);
+    }
+  }
+
+  // Check for valid key
+  for(int i = 0; i < strlen(key); ++i){
+    if ((key[i] < 'A' || key[i] > 'Z') && key[i] != ' ' && key[i] != '\n') {
+      error("enc_client error: key contains bad characters\n");
+      exit(1);
+    }
+  }
+
+  strcat(messageBuffer, "+");
+  strcat(messageBuffer, keyBuffer);
+
   // Send message to server
-  // Write to the server
   charsWritten = send(socketFD, messageBuffer, strlen(messageBuffer), 0); 
   if (charsWritten < 0){
     error("CLIENT: ERROR writing to socket");
   }
+
   if (charsWritten < strlen(messageBuffer)){
     printf("CLIENT: WARNING: Not all data written to socket!\n");
   }
 
   memset(messageBuffer, '\0', sizeof(messageBuffer));
-  // Read data from the socket, leaving \0 at end
   charsRead = recv(socketFD, messageBuffer, sizeof(messageBuffer) - 1, 0); 
   if (charsRead < 0){
     error("CLIENT: ERROR reading from socket");
