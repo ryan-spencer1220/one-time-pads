@@ -6,6 +6,34 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+void decrypt(char *message, char *key, char *ciphertext) {
+  int length = strlen(message);
+  for (int i = 0; i < length; ++i){
+    // convert ascii values to alphabet index values (A = 0, B = 1, etc.)
+    if (message[i] == '\n') {  
+      ciphertext[i] = '\0';  // Properly terminate the string
+      break;
+    } 
+    if (message[i] == ' ') {  
+      // Preserve spaces in encryption
+      ciphertext[i] = ' ';
+    } else {
+        int currMsg = message[i] - 65;
+        int currKey = key[i] - 65;
+        int total = currMsg - currKey;
+
+        // if total ascii value exceeds 26, wrap around to beginning of alphabet
+        if (total < 0) {
+          total += 26;
+        }
+
+        // convert ASCII value and append to encrypted message
+        ciphertext[i] = (total % 26) + 65;
+    }
+  }
+  ciphertext[length] = '\0'; // Null-terminate
+}
+
 void error(const char *msg) {
     perror(msg);
     exit(1);
@@ -87,25 +115,7 @@ int main(int argc, char *argv[]){
             }
         }
 
-        for (int i = 0; i < strlen(message); ++i){
-          // convert ascii values to alphabet index values (A = 0, B = 1, etc.)
-          if (message[i] == ' ') {  
-            // Preserve spaces in encryption
-            decKey[i] = ' ';
-          } else {
-              int currMsg = message[i] - 65;
-              int currKey = key[i] - 65;
-              int total = currMsg - currKey;
-
-              // if total ascii value exceeds 26, wrap around to beginning of alphabet
-              if (total < 0) {
-                total += 26;
-              }
-
-              // convert ASCII value and append to encrypted message
-              decKey[i] = (total % 26) + 65;
-          }
-        }
+        decrypt(message, key, decKey);
 
         // Send a Success message back to the client
         charsRead = send(connectionSocket, decKey, 39, 0);
