@@ -5,7 +5,6 @@
 #include <unistd.h>
 #include <time.h>
 
-
 int main(int argc, char *argv[]) {
   // Error handling
   if (argc < 2) { 
@@ -14,18 +13,26 @@ int main(int argc, char *argv[]) {
   } 
 
   int keyLength = atoi(argv[1]);
-  char key[1000];
+
+  // Allocate memory for the key based on the desired length
+  char *key = (char *)malloc(keyLength + 1);
+  if (key == NULL) {
+    perror("Failed to allocate memory for the key");
+    exit(1);
+  }
+
   srand(time(NULL));
 
   for (int i = 0; i < keyLength; ++i) {
     int min = 65; // ASCII value associated with 'A'
-    int max = 90; // ASCII value assocaitd with 'Z'
+    int max = 90; // ASCII value associated with 'Z'
 
     key[i] = min + rand() % (max - min + 1);
   }
 
-  key[keyLength] = '\0';  // Null-terminate the string
-  printf("%s", key);
-  
+  key[keyLength] = '\0';
+  printf("%s\n", key);
+
+  free(key);
   return 0;
 }

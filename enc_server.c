@@ -59,10 +59,6 @@ int main(int argc, char *argv[]){
             error("ERROR on accept");
         }
 
-        printf("SERVER: Connected to client running at host %d port %d\n",
-                ntohs(clientAddress.sin_addr.s_addr),
-                ntohs(clientAddress.sin_port));
-
         // Get the message from the client and display it
         memset(buffer, '\0', 256);
 
@@ -71,7 +67,6 @@ int main(int argc, char *argv[]){
         if (charsRead < 0){
             error("ERROR reading from socket");
         }
-        printf("SERVER: I received this: \"%s\"\n", buffer);
 
         // Break message into plaintext and key
         char *token;
@@ -92,31 +87,29 @@ int main(int argc, char *argv[]){
             }
         }
 
-        for(int i = 0; i < strlen(message); ++i){
-          // convert ascii values to alphabet index values (A = 0, B = 1, etc.)
-          int currMsg = message[i] - 65;
-          int currKey = key[i] - 65;
-          int total = currMsg + currKey;
-
-          // if total ascii value exceeds 26, wrap around to beginning of alphabet
-          if (total > 26){
-            total -= 26;
+        for (int i = 0; i < strlen(message); ++i) {
+          if (message[i] == ' ') {
+              // Preserve spaces in encryption
+              encKey[i] = ' ';
+          } else {
+              int currMsg = message[i] - 'A';  // Convert letter to index (A = 0, ..., Z = 25)
+              int currKey = key[i] - 'A';      // Convert key letter to index
+              int total = currMsg + currKey;   // Add message and key indices
+      
+              // Wrap around if the total exceeds 25 (i.e., beyond 'Z')
+              if (total >= 26) {
+                  total -= 26;
+              }
+      
+              // Convert back to an ASCII value and store it in encKey
+              encKey[i] = total + 'A';
           }
-
-          // convert ASCII value and append to encrypted message
-          char temp[10];
-          sprintf(temp, "%d", total); 
-          strcat(encKey, temp); 
         }
 
-        // Print message and key broken up
-        printf("SERVER: THIS IS THE MESSAGE: %s\n", message);
-        printf("SERVER: THIS IS THE KEY: %s\n", key);
-        printf("SERVER: THIS IS THE Encrypted Message: %s\n", encKey);
+        printf("this is the message at the server level: %s", encKey);
 
         // Send a Success message back to the client
-        charsRead = send(connectionSocket,
-                         "I am the server, and I got your message", 39, 0);
+        charsRead = send(connectionSocket, encKey, strlen(encKey), 0);
         if (charsRead < 0){
             error("ERROR writing to socket");
         }

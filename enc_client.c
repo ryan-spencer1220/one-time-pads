@@ -27,7 +27,7 @@ void setupAddressStruct(struct sockaddr_in* address,
   // Get the DNS entry for this host name
   struct hostent* hostInfo = gethostbyname(hostname); 
   if (hostInfo == NULL) { 
-    fprintf(stderr, "CLIENT: ERROR, no such host\n"); 
+    error("CLIENT: ERROR, no such host\n"); 
     exit(0); 
   }
   // Copy the first IP address from the DNS entry to sin_addr.s_addr
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
 
   // Check for valid key file
   if(strlen(message) > strlen(key)){
-    printf("Error: key %s is too short\n", argv[2]);
+    fprintf(stderr, "Error: key %s is too short\n", argv[2]);
     exit(1);
   }
 
@@ -116,7 +116,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (charsWritten < strlen(messageBuffer)){
-    printf("CLIENT: WARNING: Not all data written to socket!\n");
+    error("CLIENT: WARNING: Not all data written to socket!\n");
   }
 
   memset(messageBuffer, '\0', sizeof(messageBuffer));
@@ -124,7 +124,9 @@ int main(int argc, char *argv[]) {
   if (charsRead < 0){
     error("CLIENT: ERROR reading from socket");
   }
-  printf("CLIENT: I received this from the server: \"%s\"\n", messageBuffer);
+
+  // print message to output file
+  printf("%s\n", messageBuffer);
 
   close(socketFD); 
   return 0;
