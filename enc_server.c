@@ -5,33 +5,44 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <ctype.h>
 
 #define BUFFER_SIZE 4096
 
+
 void encrypt(char *message, char *key, char *ciphertext) {
   int length = strlen(message);
-  for (int i = 0; i < length; ++i){
-    // convert ascii values to alphabet index values (A = 0, B = 1, etc.)
+
+  for (int i = 0; i < length; ++i) {
     if (message[i] == '\n') {  
       break;
     } 
     if (message[i] == ' ') {  
       // Preserve spaces in encryption
       ciphertext[i] = ' ';
-    } else {
+    } else if (isalpha(message[i])) {
+        // Find the next alphabetic character in the key
         int currMsg = message[i] - 65;
         int currKey = key[i] - 65;
         int total = currMsg + currKey;
 
-        // if total ascii value exceeds 26, wrap around to beginning of alphabet
-        if (total > 26) {
+        printf("CurrMsg: %c\n", message[i]);
+        printf("CurrKey: %c\n", key[i]);
+
+        // if total ascii value exceeds 25, wrap around to beginning of alphabet
+        if (total >= 26) {
           total -= 26;
         }
 
         // convert ASCII value and append to encrypted message
         ciphertext[i] = (total % 26) + 65;
-    }
+    } 
+    // else {
+    //     // Preserve non-alphabetic characters
+    //     ciphertext[i] = message[i];
+    // }
   }
+  printf("CipherText: %c\n", *ciphertext);
   ciphertext[length] = '\0'; // Null-terminate
 }
 

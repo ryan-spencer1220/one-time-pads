@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
 
   // Check usage & args
   if (argc < 4) { 
-    fprintf(stderr,"USAGE: %s hostname port\n", argv[3]); 
+    fprintf(stderr,"USAGE: %s messagefile keyfile port\n", argv[0]); 
     exit(0); 
   }
 
@@ -106,27 +106,30 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  strcat(messageBuffer, "+");
-  strcat(messageBuffer, keyBuffer);
+  // Concatenate message and key with a delimiter
+  char combinedMessage[8192] = "";
+  strcat(combinedMessage, message);
+  strcat(combinedMessage, "+");
+  strcat(combinedMessage, key);
 
   // Send message to server
-  charsWritten = send(socketFD, messageBuffer, strlen(messageBuffer), 0); 
+  charsWritten = send(socketFD, combinedMessage, strlen(combinedMessage), 0); 
   if (charsWritten < 0){
     error("CLIENT: ERROR writing to socket");
   }
 
-  if (charsWritten < strlen(messageBuffer)){
+  if (charsWritten < strlen(combinedMessage)){
     error("CLIENT: WARNING: Not all data written to socket!\n");
   }
 
-  memset(messageBuffer, '\0', sizeof(messageBuffer));
-  charsRead = recv(socketFD, messageBuffer, sizeof(messageBuffer) - 1, 0); 
+  memset(combinedMessage, '\0', sizeof(combinedMessage));
+  charsRead = recv(socketFD, combinedMessage, sizeof(combinedMessage) - 1, 0); 
   if (charsRead < 0){
     error("CLIENT: ERROR reading from socket");
   }
 
   // print message to output file
-  printf("%s\n", messageBuffer);
+  printf("%s\n", combinedMessage);
 
   close(socketFD); 
   return 0;

@@ -5,33 +5,47 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
 
-void decrypt(char *message, char *key, char *ciphertext) {
+void decrypt(char *message, char *key, char *plaintext) {
   int length = strlen(message);
-  for (int i = 0; i < length; ++i){
-    // convert ascii values to alphabet index values (A = 0, B = 1, etc.)
+  int keyLength = strlen(key);
+  int keyIndex = 0;
+
+  for (int i = 0; i < length; ++i) {
     if (message[i] == '\n') {  
-      ciphertext[i] = '\0';  // Properly terminate the string
+      plaintext[i] = '\0';  // Properly terminate the string
       break;
     } 
     if (message[i] == ' ') {  
-      // Preserve spaces in encryption
-      ciphertext[i] = ' ';
-    } else {
-        int currMsg = message[i] - 65;
-        int currKey = key[i] - 65;
+      // Preserve spaces in decryption
+      plaintext[i] = ' ';
+    } else if (isalpha(message[i])) {
+        // Find the next alphabetic character in the key
+        while (!isalpha(key[keyIndex % keyLength])) {
+          keyIndex++;
+        }
+
+        int currMsg = toupper(message[i]) - 65;
+        int currKey = toupper(key[keyIndex % keyLength]) - 65;
         int total = currMsg - currKey;
 
-        // if total ascii value exceeds 26, wrap around to beginning of alphabet
+        // if total ascii value is less than 0, wrap around to end of alphabet
         if (total < 0) {
           total += 26;
         }
 
-        // convert ASCII value and append to encrypted message
-        ciphertext[i] = (total % 26) + 65;
+        // convert ASCII value and append to decrypted message
+        plaintext[i] = (total % 26) + 65;
+        keyIndex++;
+    } else {
+        // Preserve non-alphabetic characters
+        plaintext[i] = message[i];
     }
   }
-  ciphertext[length] = '\0'; // Null-terminate
+  plaintext[length] = '\0'; // Null-terminate
 }
 
 void error(const char *msg) {
